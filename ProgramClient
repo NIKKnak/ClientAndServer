@@ -8,46 +8,34 @@ namespace Client
     {
         static void Main(string[] args)
         {
-
-
-            SentMessage(args[0], args[1]);
-
+            SentMessage("Nik");
         }
 
-
-        public static void SentMessage(string From, string ip)
+        public static void SentMessage(string From, string ip = "127.0.0.1")
         {
-
             UdpClient udpClient = new UdpClient();
             IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Parse(ip), 12345);
 
-
             while (true)
             {
-                string messageText;
-                do
-                {
-                    Console.Clear();
-                    Console.WriteLine("Введите сообщение");
-                    messageText = Console.ReadLine();
-                }
-                while (string.IsNullOrEmpty(messageText));
+                Console.Write("Введите сообщение (или 'Exit' для выхода): ");
+                string input = Console.ReadLine();
 
-                Message message = new Message() { Text = messageText, DateTime = DateTime.Now, NiknameFrom = From, NiknameTo = "All" };
+                if (input.ToLower() == "exit")
+                {
+                    break;
+                }
+
+                Message message = new Message() { Text = input, DateTime = DateTime.Now, NiknameFrom = From, NiknameTo = "All" };
                 string json = message.SerializeMessageToJson();
 
                 byte[] data = Encoding.UTF8.GetBytes(json);
                 udpClient.Send(data, data.Length, iPEndPoint);
 
-                // Ожидание подтверждения от сервера
-                byte[] confirmationBuffer = udpClient.Receive(ref iPEndPoint);
-                string confirmationMessage = Encoding.UTF8.GetString(confirmationBuffer);
-                Console.WriteLine("Подтверждение от сервера: " + confirmationMessage);
+                byte[] buffer = udpClient.Receive(ref iPEndPoint);
+                var answer = Encoding.UTF8.GetString(buffer);
+                Console.WriteLine(answer);
             }
-
-
         }
-
-
     }
 }
