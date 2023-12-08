@@ -13,28 +13,35 @@ namespace Client
 
         public static void SentMessage(string From, string ip = "127.0.0.1")
         {
-            UdpClient udpClient = new UdpClient();
-            IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Parse(ip), 12345);
-
-            while (true)
+            try
             {
-                Console.Write("Введите сообщение (или 'Exit' для выхода): ");
-                string input = Console.ReadLine();
+                UdpClient udpClient = new UdpClient();
+                IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Parse(ip), 12345);
 
-                if (input.ToLower() == "exit")
+                while (true)
                 {
-                    break;
+                    Console.Write("Введите сообщение (или 'Exit' для выхода): ");
+                    string input = Console.ReadLine();
+
+                    if (input.ToLower() == "exit")
+                    {
+                        break;
+                    }
+
+                    Message message = new Message() { Text = input, DateTime = DateTime.Now, NiknameFrom = From, NiknameTo = "All" };
+                    string json = message.SerializeMessageToJson();
+
+                    byte[] data = Encoding.UTF8.GetBytes(json);
+                    udpClient.Send(data, data.Length, iPEndPoint);
+
+                    byte[] buffer = udpClient.Receive(ref iPEndPoint);
+                    var answer = Encoding.UTF8.GetString(buffer);
+                    Console.WriteLine(answer);
                 }
-
-                Message message = new Message() { Text = input, DateTime = DateTime.Now, NiknameFrom = From, NiknameTo = "All" };
-                string json = message.SerializeMessageToJson();
-
-                byte[] data = Encoding.UTF8.GetBytes(json);
-                udpClient.Send(data, data.Length, iPEndPoint);
-
-                byte[] buffer = udpClient.Receive(ref iPEndPoint);
-                var answer = Encoding.UTF8.GetString(buffer);
-                Console.WriteLine(answer);
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine($"Произошла ошибка сокета: {e.Message}");
             }
         }
     }
