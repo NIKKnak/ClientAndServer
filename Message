@@ -15,19 +15,6 @@ namespace Server
         public string NiknameFrom { get; set; }
         public string NiknameTo { get; set; }
 
-        public string SerializeMessageToJson() => JsonSerializer.Serialize(this);
-
-        public static Message? DesirializeFromJson(string message) => JsonSerializer.Deserialize<Message>(message);
-
-        public void Print()
-        {
-            Console.WriteLine(ToString());
-        }
-
-        public override string ToString()
-        {
-            return $"{this.DateTime} получено сообщение {this.Text} от {this.NiknameFrom}";
-        }
 
     }
 }
